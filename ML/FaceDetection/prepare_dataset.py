@@ -21,11 +21,13 @@ with open("wider_face_split/wider_face_train_bbx_gt.txt") as f:
             img_shape = cv2.imread(os.path.join("WIDER_train/images", img_path)).shape
         else:
             annotations = [int(x) for x in line]
-            annotations[0] /= img_shape[1]
-            annotations[1] /= img_shape[0]
-            annotations[2] /= img_shape[1]
-            annotations[3] /= img_shape[0]
-            data_train[img_path]["bboxs"].append(annotations)
+            x = (annotations[0] + annotations[2]//2) / img_shape[1]
+            y = (annotations[1] + annotations[3]//2) / img_shape[0]
+            w = annotations[2] / img_shape[1]
+            h = annotations[3] / img_shape[0]
+            new_annotations = [x,y,w,h]
+            data_train[img_path]["bboxs"].append(new_annotations)
+
         i += 1
 
 print("Reading val annotations")
@@ -47,11 +49,12 @@ with open("wider_face_split/wider_face_val_bbx_gt.txt") as f:
             img_shape = cv2.imread(os.path.join("WIDER_val/images", img_path)).shape
         else:
             annotations = [int(x) for x in line]
-            annotations[0] /= img_shape[1]
-            annotations[1] /= img_shape[0]
-            annotations[2] /= img_shape[1]
-            annotations[3] /= img_shape[0]
-            data_val[img_path]["bboxs"].append(annotations)
+            x = (annotations[0] + annotations[2]//2) / img_shape[1]
+            y = (annotations[1] + annotations[3]//2) / img_shape[0]
+            w = annotations[2] / img_shape[1]
+            h = annotations[3] / img_shape[0]
+            new_annotations = [x,y,w,h]
+            data_val[img_path]["bboxs"].append(new_annotations)
 
         i += 1
 
