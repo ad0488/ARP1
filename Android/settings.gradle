@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "ARP1"
 include ':app'
+include ':fitpolosupport'
