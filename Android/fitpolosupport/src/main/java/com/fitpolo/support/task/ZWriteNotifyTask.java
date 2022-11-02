@@ -1,8 +1,7 @@
 package com.fitpolo.support.task;
 
 
-import android.support.annotation.NonNull;
-
+import androidx.annotation.NonNull;
 import com.fitpolo.support.MokoConstants;
 import com.fitpolo.support.MokoSupport;
 import com.fitpolo.support.callback.MokoOrderTaskCallback;
