@@ -74,7 +74,7 @@ class YoloDetector(
      * Detect face on image
      */
     @Suppress("UNCHECKED_CAST")
-    fun detect(bitmap: Bitmap, imageRotation: Int) {
+    fun detect(bitmap: Bitmap, imageRotation: Int): Face? {
 //        Log.d(TAG, "SIZE ${bitmap.width} ${bitmap.height}")
         val inputImage = processInputImage(bitmap, imageRotation)
 //        Log.d(TAG, "Width: ${inputImage.width} Height ${inputImage.height}")
@@ -86,16 +86,19 @@ class YoloDetector(
         interpreter.runForMultipleInputsOutputs(inputArray, outputMap)
 
         lastInferenceTimeNanos = SystemClock.elapsedRealtimeNanos() - inferenceStartTimeNanos
-        Log.i(TAG, String.format("Interpreter took %.2f ms", 1.0f * lastInferenceTimeNanos / 1_000_000))
+        Log.i(TAG, String.format("Yolo FaceDetector took %.2f ms", 1.0f * lastInferenceTimeNanos / 1_000_000))
 
         val output = outputMap[3] as Array<Array<FloatArray>>
+        val face = postProcessModelOutput(output)
 
-        faceDetectorListener?.onResults(
-            result = postProcessModelOutput(output),
+        faceDetectorListener?.onResultsFace(
+            result = face,
             inferenceTime = lastInferenceTimeNanos / 1_000_000, // inference time in ms
             imageHeight = 640,
             imageWidth = 480
         )
+
+        return face
     }
 
     /**
@@ -186,8 +189,8 @@ class YoloDetector(
     }
 
     interface FaceDetectorListener {
-        fun onError(error: String)
-        fun onResults(
+        fun onErrorFace(error: String)
+        fun onResultsFace(
             result: Face?,
             inferenceTime: Long,
             imageHeight: Int,

@@ -1,3 +1,5 @@
+*.tflite
+
 *.iml
 .gradle
 /local.properties

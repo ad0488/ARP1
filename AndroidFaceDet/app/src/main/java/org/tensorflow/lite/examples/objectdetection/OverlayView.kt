@@ -82,7 +82,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                     val scaledX = keypoint.coordinate.x * scaleWidth
                     val scaledY = keypoint.coordinate.y * scaleHeight
 
-                    canvas.drawCircle(scaledX, scaledY, 2f, boxPaint)
+                    canvas.drawCircle(scaledX, scaledY, 4f, boxPaint)
                 }
             }
         }

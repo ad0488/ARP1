@@ -43,7 +43,10 @@ import org.tensorflow.lite.examples.objectdetection.data.Device
 import org.tensorflow.lite.examples.objectdetection.data.Face
 import org.tensorflow.lite.examples.objectdetection.databinding.FragmentCameraBinding
 
-class CameraFragment : Fragment(), YoloDetector.FaceDetectorListener {
+class CameraFragment :
+    Fragment(),
+    YoloDetector.FaceDetectorListener,
+    YawnClassifier.YawnClassifierListener {
 
     private val TAG = "ObjectDetection"
 
@@ -53,6 +56,7 @@ class CameraFragment : Fragment(), YoloDetector.FaceDetectorListener {
         get() = _fragmentCameraBinding!!
 
     private lateinit var yoloDetector: YoloDetector
+    private lateinit var yawnClassifier: YawnClassifier
     private lateinit var bitmapBuffer: Bitmap
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -96,8 +100,14 @@ class CameraFragment : Fragment(), YoloDetector.FaceDetectorListener {
 
         yoloDetector = YoloDetector.create(
             context = requireContext(),
-            device = Device.CPU,
+            device = Device.GPU,
             faceDetectorListener = this
+        )
+
+        yawnClassifier = YawnClassifier.create(
+            context = requireContext(),
+            device = Device.GPU,
+            yawnClassifierListener = this
         )
 
         // Initialize our background executor
@@ -190,7 +200,8 @@ class CameraFragment : Fragment(), YoloDetector.FaceDetectorListener {
 
         val imageRotation = image.imageInfo.rotationDegrees
         // Pass Bitmap and rotation to the object detector helper for processing and detection
-        yoloDetector.detect(bitmapBuffer, imageRotation)
+        val face = yoloDetector.detect(bitmapBuffer, imageRotation)
+        yawnClassifier.classify(bitmapBuffer, imageRotation, face)
 
     }
 
@@ -201,7 +212,7 @@ class CameraFragment : Fragment(), YoloDetector.FaceDetectorListener {
 
     // Update UI after objects have been detected. Extracts original image height/width
     // to scale and place bounding boxes properly through OverlayView
-    override fun onResults(
+    override fun onResultsFace(
         result: Face?,
         inferenceTime: Long,
         imageHeight: Int,
@@ -220,7 +231,17 @@ class CameraFragment : Fragment(), YoloDetector.FaceDetectorListener {
         }
     }
 
-    override fun onError(error: String) {
+    override fun onErrorFace(error: String) {
+        activity?.runOnUiThread {
+            Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onResultsYawn(result: Int, inferenceTime: Long) {
+        return
+    }
+
+    override fun onErrorYawn(error: String) {
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
