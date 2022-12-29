@@ -26,9 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:scaleType="fillStart"
-        tools:visibility="visible">
-
-    </androidx.camera.view.PreviewView>
+        tools:visibility="visible"/>
 
     <org.tensorflow.lite.examples.objectdetection.OverlayView
         android:id="@+id/overlay"

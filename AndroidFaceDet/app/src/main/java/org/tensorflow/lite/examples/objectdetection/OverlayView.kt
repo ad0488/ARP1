@@ -64,16 +64,20 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         }
         else{
             val bbox = result!!.boundingBox
-
+            var drawCoordinates = arrayOf<Float>()
             for (i in bbox.indices){
-                if (i%2 == 0){
-                    bbox[i] *= scaleWidth
-                }
-                else{
-                    bbox[i] *= scaleHeight
+                drawCoordinates += if (i%2 == 0){
+                    bbox[i] * scaleWidth
+                } else{
+                    bbox[i] * scaleHeight
                 }
             }
-            val drawableRect = RectF(bbox[0], bbox[1], bbox[2], bbox[3])
+            val drawableRect = RectF(
+                drawCoordinates[0],
+                drawCoordinates[1],
+                drawCoordinates[2],
+                drawCoordinates[3]
+            )
 
             canvas.drawRect(drawableRect, boxPaint)
 

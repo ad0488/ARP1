@@ -34,13 +34,9 @@ class BoxUtils(var confThreshold: Float, var iouThreshold: Float) {
      * Transform from center xywh to xyxy (inplace)
      */
     private fun xywh2xyxy(box: FloatArray) {
-//        val xMin = max(box[0] - box[2]/2, 0f)
-//        val yMin = max(box[1] - box[3]/2, 0f)
-//        val xMax = min(box[0] + box[2]/2, 640f) // TODO: remove hard-coded values
-//        val yMax = min(box[1] + box[3]/2, 640f)
         val xMin = box[0] - box[2]/2
         val yMin = box[1] - box[3]/2
-        val xMax = box[0] + box[2]/2 // TODO: remove hard-coded values
+        val xMax = box[0] + box[2]/2
         val yMax = box[1] + box[3]/2
         box[0] = xMin
         box[1] = yMin

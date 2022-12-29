@@ -1,4 +1,4 @@
-package org.tensorflow.lite.examples.objectdetection.fragments
+package org.tensorflow.lite.examples.objectdetection
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -7,10 +7,10 @@ import android.os.SystemClock
 import android.util.Log
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.examples.objectdetection.YoloDetector
 import org.tensorflow.lite.examples.objectdetection.data.Device
 import org.tensorflow.lite.examples.objectdetection.data.Face
-import org.tensorflow.lite.examples.objectdetection.utils.BoxUtils
+import org.tensorflow.lite.examples.objectdetection.utils.booleanToInt
+import org.tensorflow.lite.examples.objectdetection.utils.scaleBbox
 import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -31,7 +31,7 @@ class YawnClassifier(
         private const val MEAN = 127.5f
         private const val STD = 127.5f
         private const val TAG = "YawnClassifier"
-        private const val MODEL_FILENAME = "yawn_model.tflite"
+        private const val MODEL_FILENAME = "yawn.tflite"
 
         fun create(
             context: Context,
@@ -71,25 +71,27 @@ class YawnClassifier(
      * Classify yawn
      */
     @Suppress("UNCHECKED_CAST")
-    fun classify(bitmap: Bitmap, imageRotation: Int, face: Face?) {
+    fun classify(bitmap: Bitmap, face: Face?) {
         if(face == null){
             yawnClassifierListener?.onResultsYawn(
                 result = -1,
                 inferenceTime = 0
             )
+            return
         }
 //        Log.d(TAG, "SIZE ${bitmap.width} ${bitmap.height}")
-        val inputImage = processInputImage(bitmap, imageRotation, face!!.boundingBox)
+        val inputImage = processInputImage(bitmap, face!!.boundingBox)
 //        Log.d(TAG, "Width: ${inputImage.width} Height ${inputImage.height}")
         val inputArray = arrayOf(inputImage.tensorBuffer.buffer)
 ////        Log.d(TAG, "SHAPE: ${Arrays.toString(outputShape)}")
 
         val outputMap = HashMap<Int, Any>()
         val outputShape = interpreter.getOutputTensor(0).shape()
-//        Log.e(TAG, "OUTPUT SHAPE ${Arrays.toString(outputShape)}")
+
         outputMap[0] = Array(outputShape[0]){
             FloatArray(outputShape[1])
         }
+
 
         val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         interpreter.runForMultipleInputsOutputs(inputArray, outputMap)
@@ -98,43 +100,41 @@ class YawnClassifier(
         Log.i(TAG, String.format("Yawn Classifier took %.2f ms", 1.0f * lastInferenceTimeNanos / 1_000_000))
 
         val output = outputMap[0] as Array<FloatArray>
-        Log.e(TAG, "YAWN OUTPUT ${output[0][0]} ${output[0][1]}")
-//        val face = postProcessModelOutput(output)
-//
-//        faceDetectorListener?.onResults(
-//            result = face,
-//            inferenceTime = lastInferenceTimeNanos / 1_000_000, // inference time in ms
-//            imageHeight = 640,
-//            imageWidth = 480
-//        )
+        val result = booleanToInt(output[0][0] > 0.5)
+        Log.e(TAG, "YAWN OUT $result")
 
-//        return face
+
+        yawnClassifierListener?.onResultsYawn(
+            result = result,
+            inferenceTime = lastInferenceTimeNanos / 1_000_000, // inference time in ms
+        )
     }
 
     /**
      * Resize the input image to a TensorImage
      */
-    private fun processInputImage(bitmap: Bitmap, imageRotation: Int, bbox: Array<Float>): TensorImage {
+    private fun processInputImage(bitmap: Bitmap, bbox: Array<Float>): TensorImage {
         val imageProcessor = ImageProcessor.Builder().apply {
-            add(Rot90Op(imageRotation / 90))
+//            add(Rot90Op(imageRotation / 90))
             add(ResizeOp(inputWidth, inputHeight, ResizeOp.ResizeMethod.BILINEAR))
-//            add(NormalizeOp(MEAN, STD))
+            add(NormalizeOp(MEAN, STD))
         }.build()
+
         val matrix = Matrix() // selfie camera returns mirrored image, we have to flip it back
         matrix.preScale(-1.0f, 1.0f)
+        matrix.postRotate(90F)
         val mirroredBitmap = Bitmap.createBitmap(
             bitmap, 0, 0,
             bitmap.width, bitmap.height, matrix, false
         )
-        Log.e(TAG,"SIZE ${bitmap.width} ${bitmap.height}, BBOX: ${bbox.contentToString()}")
+//        Log.e(TAG,"SIZE ${bitmap.width} ${bitmap.height}, BBOX: ${bbox.contentToString()}")
 
-        val x = bbox[1].toInt()
-        val y = bbox[0].toInt()
-        var newWidth = (bbox[3]-bbox[1]).toInt()
-        newWidth = if (x+newWidth <= bitmap.width) newWidth else bitmap.width-x
-        var newHeight = (bbox[2]-bbox[0]).toInt()
-        newHeight = if (y+newHeight <= bitmap.height) newHeight else bitmap.height-y
-        Log.e(TAG, "NEW BBOX $newWidth $newHeight")
+        val bboxScaled = scaleBbox(bbox, bitmap.width, bitmap.height)
+        val x = bboxScaled[0].toInt()
+        val y = bboxScaled[1].toInt()
+        val newWidth = (bboxScaled[2]-bboxScaled[0]).toInt()
+        val newHeight = (bboxScaled[3]-bboxScaled[1]).toInt()
+
         val croppedBitmap = Bitmap.createBitmap(
             mirroredBitmap, x, y, newWidth, newHeight
         )

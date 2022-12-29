@@ -4,5 +4,6 @@ import android.graphics.PointF
 
 data class KeyPoint(
     var coordinate: PointF,
-    val score: Float
+    val score: Float,
+    val type: KeypointType
 )

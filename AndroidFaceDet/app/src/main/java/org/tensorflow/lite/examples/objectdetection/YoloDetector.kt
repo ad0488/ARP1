@@ -11,6 +11,7 @@ import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.examples.objectdetection.data.Device
 import org.tensorflow.lite.examples.objectdetection.data.Face
 import org.tensorflow.lite.examples.objectdetection.data.KeyPoint
+import org.tensorflow.lite.examples.objectdetection.data.KeypointType
 import org.tensorflow.lite.examples.objectdetection.utils.BoxUtils
 import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
@@ -33,7 +34,7 @@ class YoloDetector(
         private const val MEAN = 127.5f
         private const val STD = 127.5f
         private const val TAG = "YoloDetector"
-        private const val MODEL_FILENAME = "model_float16.tflite"
+        private const val MODEL_FILENAME = "yolo.tflite"
 
         fun create(
             context: Context,
@@ -110,6 +111,7 @@ class YoloDetector(
             add(ResizeOp(inputWidth, inputHeight, ResizeOp.ResizeMethod.BILINEAR))
             add(NormalizeOp(MEAN, STD))
         }.build()
+
         val matrix = Matrix() // selfie camera returns mirrored image, we have to flip it back
         matrix.preScale(-1.0f, 1.0f)
         val mirroredBitmap = Bitmap.createBitmap(
@@ -134,11 +136,14 @@ class YoloDetector(
         val boundingBox: Array<Float> =
             arrayOf(prediction[0], prediction[1], prediction[2], prediction[3])
         val keypoints = mutableListOf<KeyPoint>()
+
+        val keypointTypes = KeypointType.values()
+
         for (i in 0 until 5){
             val x = prediction[6 + 3*i]
             val y = prediction[6 + 3*i+1]
             val score = prediction[6 + 3*i+2]
-            keypoints.add(KeyPoint(PointF(x,y), score))
+            keypoints.add(KeyPoint(PointF(x,y), score, keypointTypes[i]))
         }
         Log.d(TAG, "Face detected")
         return Face(boundingBox, keypoints)
