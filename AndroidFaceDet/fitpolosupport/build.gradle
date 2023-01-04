@@ -1,0 +1,23 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 18
+        targetSdkVersion 28
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'no.nordicsemi.android.support.v18:scanner:1.6.0'
+    implementation 'com.elvishew:xlog:1.11.0'
+    api 'no.nordicsemi.android:dfu:2.3.0'
+    implementation "androidx.annotation:annotation:1.5.0"
+}
