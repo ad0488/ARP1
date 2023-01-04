@@ -3,20 +3,20 @@ import os
 import numpy as np
 import tensorflow as tf
 
-from interpreter import Interpreter
+from interpreter import InterpreterTFLite
 from utils import *
 
 
 yolo_model = "./models/yolo.tflite"
-yolo_interpreter = Interpreter(yolo_model, output_index=3)
+yolo_interpreter = InterpreterTFLite(yolo_model, output_index=3)
 
 yawn_model = "./models/yawn.tflite"
-yawn_interpreter = Interpreter(yawn_model)
+yawn_interpreter = InterpreterTFLite(yawn_model)
 
 eye_model = "./models/eye.tflite"
-eye_interpreter = Interpreter(eye_model)
+eye_interpreter = InterpreterTFLite(eye_model)
 
-vid = cv2.VideoCapture(1)
+vid = cv2.VideoCapture(0)
 
 while(True):
     ret, frame = vid.read()
