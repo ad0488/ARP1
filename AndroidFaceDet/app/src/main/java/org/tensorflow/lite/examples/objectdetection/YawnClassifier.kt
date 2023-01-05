@@ -28,8 +28,8 @@ class YawnClassifier(
 ) {
     companion object{
         private const val CPU_NUM_THREADS = 4
-        private const val MEAN = 127.5f
-        private const val STD = 127.5f
+        private const val MEAN = 0f //127.5f
+        private const val STD = 255f //127.5f
         private const val TAG = "YawnClassifier"
         private const val MODEL_FILENAME = "yawn.tflite"
 
@@ -92,7 +92,6 @@ class YawnClassifier(
             FloatArray(outputShape[1])
         }
 
-
         val inferenceStartTimeNanos = SystemClock.elapsedRealtimeNanos()
         interpreter.runForMultipleInputsOutputs(inputArray, outputMap)
 
@@ -102,7 +101,6 @@ class YawnClassifier(
         val output = outputMap[0] as Array<FloatArray>
         val result = booleanToInt(output[0][0] > 0.5)
         Log.e(TAG, "YAWN OUT $result")
-
 
         yawnClassifierListener?.onResultsYawn(
             result = result,

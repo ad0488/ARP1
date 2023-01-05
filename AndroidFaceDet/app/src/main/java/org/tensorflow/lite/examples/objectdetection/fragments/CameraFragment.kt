@@ -35,12 +35,9 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
-import org.tensorflow.lite.examples.objectdetection.EyeClassifier
+import org.tensorflow.lite.examples.objectdetection.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import org.tensorflow.lite.examples.objectdetection.R
-import org.tensorflow.lite.examples.objectdetection.YawnClassifier
-import org.tensorflow.lite.examples.objectdetection.YoloDetector
 import org.tensorflow.lite.examples.objectdetection.data.Device
 import org.tensorflow.lite.examples.objectdetection.data.Face
 import org.tensorflow.lite.examples.objectdetection.databinding.FragmentCameraBinding
@@ -62,6 +59,7 @@ class CameraFragment :
     private lateinit var yoloDetector: YoloDetector
     private lateinit var yawnClassifier: YawnClassifier
     private lateinit var eyeClassifier: EyeClassifier
+    private lateinit var mainClassifier: MainClassifier
     private lateinit var bitmapBuffer: Bitmap
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -120,6 +118,8 @@ class CameraFragment :
             device = Device.GPU,
             eyeClassifierListener = this
         )
+
+        mainClassifier = MainClassifier()
 
         // Initialize our background executor
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -218,6 +218,7 @@ class CameraFragment :
         // detect eyes closed
         eyeClassifier.classify(bitmapBuffer, face, predictLeftEye = true)
         eyeClassifier.classify(bitmapBuffer, face, predictLeftEye = false)
+        mainClassifier.predictFinal()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -253,7 +254,7 @@ class CameraFragment :
     }
 
     override fun onResultsYawn(result: Int, inferenceTime: Long) {
-        return
+        mainClassifier.addPrediction(result, type="yawn")
     }
 
     override fun onErrorYawn(error: String) {
@@ -263,7 +264,11 @@ class CameraFragment :
     }
 
     override fun onResultsEye(result: Int, inferenceTime: Long, predictLeftEye: Boolean) {
-        return
+        var type = "leftEye"
+        if (!predictLeftEye){
+            type = "rightEye"
+        }
+        mainClassifier.addPrediction(result, type=type)
     }
 
     override fun onErrorEye(error: String) {

@@ -15,7 +15,8 @@ yawn_interpreter = InterpreterTF(yawn_model, type="yawn")
 eye_model = "./models/eye.h5"
 eye_interpreter = InterpreterTF(eye_model, type="eye")
 
-video_path = "data/Fold1_part1/05/10.MOV"
+# video_path = "data/Fold1_part1/05/10.MOV"
+video_path = "data/YawDD dataset/Dash/Male/4-MaleNoGlasses.avi"
 cap = cv2.VideoCapture(video_path)
 
 counter = 0
@@ -27,13 +28,13 @@ while cap.isOpened():
         print("Error")
         break
     counter += 1
-    if counter < 5000:
-        continue
-    if counter > 6000:
-        break
+    # if counter < 5000:
+    #     continue
+    # if counter > 6000:
+    #     break
 
     frame = cv2.resize(frame, (640,640))
-    frame = cv2.flip(frame, 0)
+    # frame = cv2.flip(frame, 0)
     yolo_frame = preprocess_yolo_onnx(frame)
     face = yolo_interpreter.predict(yolo_frame)[0]
 
@@ -70,8 +71,9 @@ while cap.isOpened():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-temp = video_path.split("/")
-out_video_path = "/".join(temp[:-1]) +"/"+ temp[-1].split(".")[0]+"_predicted.mp4"
+# temp = video_path.split("/")
+# out_video_path = "/".join(temp[:-1]) +"/"+ temp[-1].split(".")[0]+"_predicted.mp4"
+out_video_path = "test2.mp4"
 print("Saving video:", out_video_path)
 
 fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
