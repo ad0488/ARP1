@@ -23,6 +23,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
@@ -103,19 +104,19 @@ class CameraFragment :
 
         yoloDetector = YoloDetector.create(
             context = requireContext(),
-            device = Device.GPU,
+            device = Device.CPU,
             faceDetectorListener = this
         )
 
         yawnClassifier = YawnClassifier.create(
             context = requireContext(),
-            device = Device.GPU,
+            device = Device.CPU,
             yawnClassifierListener = this
         )
 
         eyeClassifier = EyeClassifier.create(
             context = requireContext(),
-            device = Device.GPU,
+            device = Device.CPU,
             eyeClassifierListener = this
         )
 
@@ -254,6 +255,10 @@ class CameraFragment :
     }
 
     override fun onResultsYawn(result: Int, inferenceTime: Long) {
+        //view?.findViewById<TextView>(R.id.textView6)?.text = result.toString()
+        activity?.runOnUiThread {
+            view?.findViewById<TextView>(R.id.textView6)?.text = result.toString()
+        }
         mainClassifier.addPrediction(result, type="yawn")
     }
 
@@ -267,6 +272,14 @@ class CameraFragment :
         var type = "leftEye"
         if (!predictLeftEye){
             type = "rightEye"
+            activity?.runOnUiThread {
+                view?.findViewById<TextView>(R.id.textView5)?.text = result.toString()
+            }
+        }
+        else {
+            activity?.runOnUiThread {
+                view?.findViewById<TextView>(R.id.textView4)?.text = result.toString()
+            }
         }
         mainClassifier.addPrediction(result, type=type)
     }
@@ -277,3 +290,4 @@ class CameraFragment :
         }
     }
 }
+
