@@ -16,6 +16,7 @@
 package org.tensorflow.lite.examples.objectdetection.fragments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -25,24 +26,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.camera.core.AspectRatio
-import androidx.camera.core.Camera
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.*
 import androidx.camera.core.ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import org.tensorflow.lite.examples.objectdetection.*
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import org.tensorflow.lite.examples.objectdetection.R
 import org.tensorflow.lite.examples.objectdetection.data.Device
 import org.tensorflow.lite.examples.objectdetection.data.Face
 import org.tensorflow.lite.examples.objectdetection.databinding.FragmentCameraBinding
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import kotlin.math.roundToInt
+
 
 class CameraFragment :
     Fragment(),
@@ -87,6 +85,12 @@ class CameraFragment :
 
         // Shut down our background executor
         cameraExecutor.shutdown()
+
+        val tinyDB : TinyDB = TinyDB(activity)
+        tinyDB.putListDouble("yawn", mainClassifier.f_yawnPredictions)
+        tinyDB.putListDouble("eyes", mainClassifier.f_eyePredictions)
+        tinyDB.putListDouble("drowz", mainClassifier.f_drowzPredictions)
+
     }
 
     override fun onCreateView(

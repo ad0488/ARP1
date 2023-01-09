@@ -1,7 +1,5 @@
 package org.tensorflow.lite.examples.objectdetection
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import java.util.*
 
@@ -15,6 +13,10 @@ class MainClassifier {
     private val leftEyePredictions = arrayListOf<Int>()
     val nRightEye = 5
     private val rightEyePredictions = arrayListOf<Int>()
+
+    val f_yawnPredictions = arrayListOf<Double>()
+    val f_eyePredictions = arrayListOf<Double>()
+    val f_drowzPredictions = arrayListOf<Double>()
 
     val windowsSize = 10
     val alpha = 0.5 // weight between FOM in PERCLOS
@@ -85,6 +87,9 @@ class MainClassifier {
             Log.e(TAG, "Drowsiness level: $average")
             drowz = average.toDouble()
         }
+        f_eyePredictions.add(PERCLOS.toDouble())
+        f_yawnPredictions.add(FOM.toDouble())
+        f_drowzPredictions.add(drowz)
     }
 
 }

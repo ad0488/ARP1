@@ -42,6 +42,8 @@ class MainActivity : AppCompatActivity() {
             finishAfterTransition()
         } else {
             super.onBackPressed()
+            //println("Zaključil")
+
         }
     }
 }
