@@ -1,5 +1,7 @@
 package org.tensorflow.lite.examples.objectdetection
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import java.util.*
 
@@ -17,6 +19,7 @@ class MainClassifier {
     val windowsSize = 10
     val alpha = 0.5 // weight between FOM in PERCLOS
     private val samples = arrayListOf<Float>()
+    var drowz = 0.0
 
 
     fun addPrediction(result: Int, type: String){
@@ -80,6 +83,7 @@ class MainClassifier {
         if(samples.size == windowsSize){
             val average = samples.sum() / windowsSize
             Log.e(TAG, "Drowsiness level: $average")
+            drowz = average.toDouble()
         }
     }
 

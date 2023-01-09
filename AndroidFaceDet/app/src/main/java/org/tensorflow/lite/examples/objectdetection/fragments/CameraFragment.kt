@@ -42,6 +42,7 @@ import java.util.concurrent.Executors
 import org.tensorflow.lite.examples.objectdetection.data.Device
 import org.tensorflow.lite.examples.objectdetection.data.Face
 import org.tensorflow.lite.examples.objectdetection.databinding.FragmentCameraBinding
+import kotlin.math.roundToInt
 
 class CameraFragment :
     Fragment(),
@@ -220,6 +221,7 @@ class CameraFragment :
         eyeClassifier.classify(bitmapBuffer, face, predictLeftEye = true)
         eyeClassifier.classify(bitmapBuffer, face, predictLeftEye = false)
         mainClassifier.predictFinal()
+        onDisplayDrowziness()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -289,5 +291,14 @@ class CameraFragment :
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun onDisplayDrowziness() {
+        activity?.runOnUiThread {
+            val dr = mainClassifier.drowz
+            val roundoff = (dr * 10000).roundToInt().toDouble() / 10000
+            view?.findViewById<TextView>(R.id.textView8)?.text = roundoff.toString()
+        }
+    }
+
 }
 
