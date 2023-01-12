@@ -9,20 +9,19 @@ class MainClassifier {
 
     val nYawn = 5
     private val yawnPredictions = arrayListOf<Int>()
-    val nLeftEye = 5
+    val nLeftEye = 3
     private val leftEyePredictions = arrayListOf<Int>()
-    val nRightEye = 5
+    val nRightEye = 3
     private val rightEyePredictions = arrayListOf<Int>()
 
-    val f_yawnPredictions = arrayListOf<Double>()
-    val f_eyePredictions = arrayListOf<Double>()
-    val f_drowzPredictions = arrayListOf<Double>()
+    val f_fomPredictions = arrayListOf<Double>()
+    val f_perclosPredictions = arrayListOf<Double>()
+    val f_drowsyPredictions = arrayListOf<Double>()
 
     val windowsSize = 10
-    val alpha = 0.5 // weight between FOM in PERCLOS
+    val alpha = 0.30 // weight between FOM in PERCLOS
     private val samples = arrayListOf<Float>()
-    var drowz = 0.0
-
+    var drowsiness_level = 0.0
 
     fun addPrediction(result: Int, type: String){
         when (type) {
@@ -85,11 +84,10 @@ class MainClassifier {
         if(samples.size == windowsSize){
             val average = samples.sum() / windowsSize
             Log.e(TAG, "Drowsiness level: $average")
-            drowz = average.toDouble()
+            drowsiness_level = average.toDouble()
         }
-        f_eyePredictions.add(PERCLOS.toDouble())
-        f_yawnPredictions.add(FOM.toDouble())
-        f_drowzPredictions.add(drowz)
+        f_perclosPredictions.add(PERCLOS.toDouble())
+        f_fomPredictions.add(FOM.toDouble())
+        f_drowsyPredictions.add(drowsiness_level)
     }
-
 }

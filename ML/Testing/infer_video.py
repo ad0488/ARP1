@@ -15,8 +15,12 @@ yawn_interpreter = InterpreterTF(yawn_model, type="yawn")
 eye_model = "./models/eye.h5"
 eye_interpreter = InterpreterTF(eye_model, type="eye")
 
-video_path = "data/Fold1_part1/05/0.MOV"
-# video_path = "data/YawDD dataset/Dash/Male/4-MaleNoGlasses.avi"
+# video_path = "data/Fold1_part1/05/0.MOV"
+# video_path = "data/YawDD dataset/Mirror/Male_mirror Avi Videos/7-MaleGlasses-Normal.avi"
+# video_path = "data/YawDD dataset/Mirror/Male_mirror Avi Videos/7-MaleGlasses-Talking.avi"
+video_path = "data/YawDD dataset/Mirror/Male_mirror Avi Videos/7-MaleGlasses-Yawning.avi"
+out_json_name = "data_yawning7.json"
+
 cap = cv2.VideoCapture(video_path)
 
 counter = 0
@@ -35,8 +39,8 @@ while cap.isOpened():
     counter += 1
     # if counter < 5000:
     #     continue
-    if counter > 1000:
-        break
+    # if counter > 1000:
+    #     break
 
     frame = cv2.resize(frame, (640,640))
     # frame = cv2.flip(frame, 0)
@@ -81,7 +85,7 @@ while cap.isOpened():
 
 import json
 json_object = json.dumps(data, indent=4)
-with open("data2.json", "w") as outfile:
+with open(out_json_name, "w") as outfile:
     outfile.write(json_object)
 
 # temp = video_path.split("/")

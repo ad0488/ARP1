@@ -18,18 +18,12 @@ package org.tensorflow.lite.examples.objectdetection
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import org.tensorflow.lite.examples.objectdetection.data.Face
-import java.util.LinkedList
-import kotlin.math.max
-import org.tensorflow.lite.task.vision.detector.Detection
 
 class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
@@ -52,7 +46,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     }
 
     private fun initPaints() {
-        boxPaint.color = ContextCompat.getColor(context!!, R.color.bounding_box_color)
+        boxPaint.color = ContextCompat.getColor(context!!, R.color.main_color)
         boxPaint.strokeWidth = 8F
         boxPaint.style = Paint.Style.STROKE
     }

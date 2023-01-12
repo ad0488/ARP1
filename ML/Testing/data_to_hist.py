@@ -8,12 +8,12 @@ def get_chunks(array):
     )[0])[::2]
 
 
-JSON_FILENAME = "data2.json"
+JSON_FILENAME = "data_yawning7.json"
 with open(JSON_FILENAME, 'r') as openfile:
     json_object = json.load(openfile)
 
-eye_left = np.array(json_object["eye_right"])
-chunks = get_chunks(eye_left)
+yawn = np.array(json_object["yawn"])[::4]
+chunks = get_chunks(yawn)
 unique = np.unique(chunks)
 plt.hist(chunks)
 plt.show()

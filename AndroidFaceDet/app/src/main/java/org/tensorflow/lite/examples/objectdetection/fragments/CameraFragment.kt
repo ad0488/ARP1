@@ -16,7 +16,7 @@
 package org.tensorflow.lite.examples.objectdetection.fragments
 
 import android.annotation.SuppressLint
-import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -24,6 +24,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.core.*
@@ -65,6 +66,9 @@ class CameraFragment :
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
+    private var totalInferenceTime: Long = 0
+
+    private lateinit var tinyDB : TinyDB;
 
     /** Blocking camera operations are performed using this executor */
     private lateinit var cameraExecutor: ExecutorService
@@ -85,12 +89,6 @@ class CameraFragment :
 
         // Shut down our background executor
         cameraExecutor.shutdown()
-
-        val tinyDB : TinyDB = TinyDB(activity)
-        tinyDB.putListDouble("yawn", mainClassifier.f_yawnPredictions)
-        tinyDB.putListDouble("eyes", mainClassifier.f_eyePredictions)
-        tinyDB.putListDouble("drowz", mainClassifier.f_drowzPredictions)
-
     }
 
     override fun onCreateView(
@@ -107,21 +105,24 @@ class CameraFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        tinyDB = TinyDB(activity)
+        clearData()
+
         yoloDetector = YoloDetector.create(
             context = requireContext(),
-            device = Device.CPU,
+            device = Device.GPU,
             faceDetectorListener = this
         )
 
         yawnClassifier = YawnClassifier.create(
             context = requireContext(),
-            device = Device.CPU,
+            device = Device.GPU,
             yawnClassifierListener = this
         )
 
         eyeClassifier = EyeClassifier.create(
             context = requireContext(),
-            device = Device.CPU,
+            device = Device.GPU,
             eyeClassifierListener = this
         )
 
@@ -135,6 +136,27 @@ class CameraFragment :
             // Set up the camera and its use cases
             setUpCamera()
         }
+
+        val finishBtn: Button = view.findViewById(R.id.finish_btn)
+        finishBtn.setOnClickListener{
+            Log.d(TAG, "Finish button pressed")
+            saveData()
+            val intent = Intent(activity, MainMenuActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun saveData(){
+        // save data to shared preferences
+        tinyDB.putListDouble("fom", mainClassifier.f_fomPredictions)
+        tinyDB.putListDouble("perclos", mainClassifier.f_perclosPredictions)
+        tinyDB.putListDouble("drowsy", mainClassifier.f_drowsyPredictions)
+    }
+
+    private fun clearData(){
+        tinyDB.remove("fom")
+        tinyDB.remove("perclos")
+        tinyDB.remove("drowsy")
     }
 
     // Initialize CameraX, and prepare to bind the camera use cases
@@ -217,6 +239,8 @@ class CameraFragment :
 
         val imageRotation = image.imageInfo.rotationDegrees
 
+        // Reset inference time before start
+        totalInferenceTime = 0
         // Pass Bitmap and rotation to the object detector helper for processing and detection
         val face = yoloDetector.detect(bitmapBuffer, imageRotation)
         // detect yawning
@@ -225,7 +249,8 @@ class CameraFragment :
         eyeClassifier.classify(bitmapBuffer, face, predictLeftEye = true)
         eyeClassifier.classify(bitmapBuffer, face, predictLeftEye = false)
         mainClassifier.predictFinal()
-        onDisplayDrowziness()
+        onDisplayDrowsiness()
+        updateBottomShelfUI()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -241,6 +266,7 @@ class CameraFragment :
         imageHeight: Int,
         imageWidth: Int
     ) {
+        totalInferenceTime += inferenceTime
         activity?.runOnUiThread {
             // Pass necessary information to OverlayView for drawing on the canvas
             fragmentCameraBinding.overlay.setResults(
@@ -261,9 +287,9 @@ class CameraFragment :
     }
 
     override fun onResultsYawn(result: Int, inferenceTime: Long) {
-        //view?.findViewById<TextView>(R.id.textView6)?.text = result.toString()
+        totalInferenceTime += inferenceTime
         activity?.runOnUiThread {
-            view?.findViewById<TextView>(R.id.textView6)?.text = result.toString()
+            view?.findViewById<TextView>(R.id.yawn_class)?.text = result.toString()
         }
         mainClassifier.addPrediction(result, type="yawn")
     }
@@ -275,16 +301,17 @@ class CameraFragment :
     }
 
     override fun onResultsEye(result: Int, inferenceTime: Long, predictLeftEye: Boolean) {
+        totalInferenceTime += inferenceTime
         var type = "leftEye"
         if (!predictLeftEye){
             type = "rightEye"
             activity?.runOnUiThread {
-                view?.findViewById<TextView>(R.id.textView5)?.text = result.toString()
+                view?.findViewById<TextView>(R.id.right_eye_class)?.text = result.toString()
             }
         }
         else {
             activity?.runOnUiThread {
-                view?.findViewById<TextView>(R.id.textView4)?.text = result.toString()
+                view?.findViewById<TextView>(R.id.left_eye_class)?.text = result.toString()
             }
         }
         mainClassifier.addPrediction(result, type=type)
@@ -296,11 +323,18 @@ class CameraFragment :
         }
     }
 
-    fun onDisplayDrowziness() {
+    private fun onDisplayDrowsiness() {
         activity?.runOnUiThread {
-            val dr = mainClassifier.drowz
+            val dr = mainClassifier.drowsiness_level
             val roundoff = (dr * 10000).roundToInt().toDouble() / 10000
-            view?.findViewById<TextView>(R.id.textView8)?.text = roundoff.toString()
+            view?.findViewById<TextView>(R.id.drowsiness_level)?.text = roundoff.toString()
+        }
+    }
+
+    private fun updateBottomShelfUI(){
+        Log.e(TAG, "Total inference time: "+totalInferenceTime.toString() + " ms")
+        activity?.runOnUiThread {
+            view?.findViewById<TextView>(R.id.inference_time_val)?.text = totalInferenceTime.toString()+" ms"
         }
     }
 

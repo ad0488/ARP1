@@ -11,15 +11,15 @@ class MainMenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_menu)
 
-        val button: Button = findViewById(R.id.startBtn)
-        button.setOnClickListener{
+        val startBtn: Button = findViewById(R.id.startBtn)
+        startBtn.setOnClickListener{
             Log.d("MainMenu", "Start button pressed")
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
 
-        val button2: Button = findViewById(R.id.historyBtn)
-        button2.setOnClickListener{
+        val historyBtn: Button = findViewById(R.id.historyBtn)
+        historyBtn.setOnClickListener{
             Log.d("MainMenu", "History button pressed")
             val intent = Intent(this, GraphActivity::class.java)
             startActivity(intent)

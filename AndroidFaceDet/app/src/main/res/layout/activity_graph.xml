@@ -6,14 +6,65 @@
     android:layout_height="match_parent"
     tools:context=".GraphActivity">
 
+ <LinearLayout
+     android:layout_width="match_parent"
+     android:layout_height="match_parent"
+     android:orientation="vertical">
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chart"
+     <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chartDrowsy"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" >
 
+     </com.github.mikephil.charting.charts.LineChart>
 
+     <TextView
+         android:id="@+id/textView3"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:text="Drowsiness Level: Computed drowsiness level based on person's activity" />
+
+     <com.github.mikephil.charting.charts.LineChart
+         android:id="@+id/chartFom"
+         android:layout_width="match_parent"
+         android:layout_height="200dp"
+         android:layout_marginTop="20dp"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintHorizontal_bias="0.0"
+         app:layout_constraintStart_toStartOf="@+id/chartDrowsy"
+         app:layout_constraintTop_toTopOf="parent">
+
+         <TextView
+             android:id="@+id/textView4"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:text="TextView" />
+     </com.github.mikephil.charting.charts.LineChart>
+
+     <TextView
+         android:id="@+id/textView"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:text="FOM: measures how sure are we that the person actually yawned" />
+
+     <com.github.mikephil.charting.charts.LineChart
+         android:id="@+id/chartPerclos"
+         android:layout_width="match_parent"
+         android:layout_height="200dp"
+         android:layout_marginTop="20dp"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintHorizontal_bias="0.0"
+         app:layout_constraintStart_toStartOf="@+id/chartFom"
+         app:layout_constraintTop_toTopOf="parent" />
+
+     <TextView
+         android:id="@+id/textView2"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:text="PERCLOS: measures how sure are we that the person actually had their eyes closed" />
+
+ </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
