@@ -32,6 +32,7 @@ data = {
     "eye_right": [],
 }
 while cap.isOpened():
+    fps = cap.get(cv2.CAP_PROP_FPS)
     ret, frame = cap.read()
     if not ret:
         print("Error")
